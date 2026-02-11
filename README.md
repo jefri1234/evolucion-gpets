@@ -35,8 +35,15 @@ docker build -t gpets-backend .
 ```
 * Ejecutar el contenedor:
 ```env
-docker run -p 3000:3000 --env-file .env gpets-backend
+docker run -p 3000:3000 --restart unless-stopped --env-file .env gpets-backend
 ```
+## Docker Compose - Corre la  App al instante
+Este opcion es mas rapido construñe la imagen y levante el contendor con todo los parametros necesarios al contenedor docker.
+* Ejecutar comando docker:
+```env
+docker compose up --build
+```
+
 ## Documentación de la API
 Una vez que el servidor esté corriendo, puedes acceder a la documentación interactiva (Swagger) en:
 ```env
