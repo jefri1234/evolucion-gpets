@@ -48,17 +48,45 @@ export class PetsService {
     return { id: newPetRef.key, ...createPetDto };
   }
 
-  async updateLocation(petId: string, lat: number, lng: number) {
+  async updateLocation(petId: string, data: { latitude: number; longitude: number }) {
     const db = admin.database();
-    const locationRef = db.ref(`locations/${petId}`);
 
-    const updateData = {
-      lat,
-      lng,
-      lastUpdate: Date.now()
-    };
 
-    await locationRef.update(updateData);
-    return { petId, ...updateData };
+    await db.ref(`pets/${petId}`).update({
+      latitude: data.latitude,
+      longitude: data.longitude,
+      lastUpdate: new Date().toISOString()
+    });
+
+
+    await db.ref(`locations/${petId}`).set({
+      petId: petId,
+      latitude: data.latitude,
+      longitude: data.longitude,
+      petName: (await db.ref(`pets/${petId}/name`).once('value')).val() || 'Mascota',
+      lastUpdate: new Date().toISOString()
+    });
+
+    return { success: true };
+  }
+  async findByOwner(ownerId: string) {
+    const db = admin.database();
+    const ref = db.ref('pets');
+
+    const snapshot = await ref.orderByChild('ownerId').equalTo(ownerId).once('value');
+    const data = snapshot.val();
+
+    if (!data) return [];
+    return Object.entries(data).map(([id, value]: [string, any]) => ({
+      id,
+      ...value,
+    }));
+  }
+
+  async remove(id: string) {
+    const db = admin.database();
+    await db.ref(`pets/${id}`).remove();
+    await db.ref(`locations/${id}`).remove();
+    return { deleted: true };
   }
 }

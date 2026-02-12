@@ -1,5 +1,5 @@
 
-import { Controller, Param, Query, Get, Post, Body, Patch } from '@nestjs/common';
+import { Controller, Param, Query, Get, Post, Body, Patch, Delete } from '@nestjs/common';
 import { PetsService } from './pets.service';
 import { ApiTags, ApiOperation, ApiQuery, ApiResponse, ApiParam } from '@nestjs/swagger';
 import { CreatePetDto } from './dto/create-pets.dto';
@@ -32,12 +32,22 @@ export class PetsController {
     }
 
     @Patch(':id/location')
-    @ApiOperation({ summary: 'Actualizar ubicación de la mascota en tiempo real' })
-    @ApiParam({ name: 'id', description: 'ID de la mascota a actualizar', example: '-OlBw_98lUiaBqZ7ezqG' })
     async updateLocation(
         @Param('id') id: string,
-        @Body() updateLocationDto: UpdateLocationDto
+        @Body() locationData: { latitude: number; longitude: number }
     ) {
-        return await this.petsService.updateLocation(id, updateLocationDto.lat, updateLocationDto.lng);
+        return this.petsService.updateLocation(id, locationData);
     }
+
+    @Get('owner/:ownerId')
+    async getByOwner(@Param('ownerId') ownerId: string) {
+        return this.petsService.findByOwner(ownerId);
+    }
+
+    @Delete(':id')
+    async remove(@Param('id') id: string) {
+        return this.petsService.remove(id);
+    }
+
+
 }
